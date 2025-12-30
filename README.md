@@ -35,19 +35,26 @@ enabling advanced management capabilities through AI-powered similarity detectio
 
 ## Version Compatibility
 
-**MediaKit v0.1.11+** supports all Immich versions through automatic schema detection.
+**Important**: Different versions of MediaKit are compatible with different versions of Immich due to database schema changes.
 
-**Automatic Schema Detection:**
-MediaKit automatically detects and adapts to your Immich database schema:
-- Table names (plural vs singular: assets/asset, albums/album, tags/tag, users/user)
-- Junction table column names (plural vs singular: albumsId/albumId, assetsId/assetId, tagsId/tagId)
+| MediaKit Version | Compatible Immich Version | Notes |
+|-----------------|---------------------------|-------|
+| 0.1.9 and below | Immich ≤ 1.135.3 | Uses plural table names (assets, users, albums) |
+| 0.1.10 and above | Immich ≥ 1.136.0 | Uses singular table names (asset, user, album) |
 
-No manual configuration needed - MediaKit works seamlessly across all Immich versions.
+**Database Schema Changes:**
+- Immich v1.136.0 introduced significant database schema changes, switching from plural to singular table names
+- MediaKit versions have been updated to match these changes
+- Using mismatched versions will result in database connection errors
 
-**Immich Schema Evolution:**
-- **Immich v1.136.0**: Changed main table names from plural to singular (assets → asset, albums → album, tags → tag, users → user)
-- **Immich v2.3.0**: Changed junction table column names from plural to singular (albumsId → albumId, assetsId → assetId, tagsId → tagId)
-- MediaKit automatically handles all these variations
+**How to check your Immich version:**
+1. Open your Immich web interface
+2. Go to Settings → About
+3. Check the version number displayed
+
+**Upgrade Path:**
+- If upgrading Immich from pre-1.136.0 to 1.136.0 or later, you must also upgrade MediaKit to version 0.1.10 or later
+- If you need to stay on an older Immich version, use MediaKit 0.1.9
 
 ---
 
@@ -57,9 +64,6 @@ No manual configuration needed - MediaKit works seamlessly across all Immich ver
 2. Processes images through ResNet152 to extract feature vectors
 3. Stores vectors in the Qdrant vector database
 4. Uses vector similarity to identify similar/duplicate photos
-   - **Multi-user scope**: Duplicate detection operates across all imported users
-   - Import single user: duplicates detected within that user only
-   - Import multiple users: duplicates detected across all imported users
 5. Displays similar photo groups based on the configured threshold
 6. Manages asset deletion by updating Immich database directly:
    - Follows Immich's deletion logic for compatibility
@@ -135,13 +139,6 @@ No manual configuration needed - MediaKit works seamlessly across all Immich ver
 - **Large collection tips**
   - For 8000+ photos: Enable Multi Mode with appropriate Max Group settings
   - Use batch operations for efficiency
-
-- **Finding similar content (reverse approach)**
-  - For finding similar themes (memes, similar scenes, burst shots):
-    - Start with low threshold (0.60-0.70) + `Multi Mode` with limited `Max Group`
-    - Progressively raise threshold to filter out less similar matches
-  - This is the reverse of duplicate cleaning - work your way up instead of down
-  - Always limit `Max Group` when using low thresholds to avoid overwhelming results
 
 - **External library considerations**
   - Ensure external library paths are not set to read-only if using Docker Compose

@@ -1,0 +1,25 @@
+# Version control
+.git
+.gitignore
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.env
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
+
+# Editor configs
+.vscode/
+.idea/
+
+# Logs
+*.log

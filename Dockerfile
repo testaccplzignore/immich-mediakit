@@ -1,30 +1,34 @@
 # syntax = docker/dockerfile:1.5
 
-# Build argument for device selection
-ARG DEVICE=cpu
-
-FROM python:3.12
+ARG DEVICE=cuda
+FROM python:3.11
 
 WORKDIR /app
 
 ARG MKIT_PORT=8086
 ENV PORT=${MKIT_PORT}
 
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Redeclare DEVICE after FROM
+ARG DEVICE
+ENV DEVICE=${DEVICE}
 
-# Copy appropriate requirements file based on device
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libmagic-dev \
+    ffmpeg \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY requirements*.txt ./
 
-# Install dependencies based on device type
-RUN --mount=type=cache,target=/root/.cache \
-    if [ "$DEVICE" = "cuda" ]; then \
-        pip install -r requirements-cuda.txt; \
+# Now DEVICE is available inside RUN
+RUN if [ "$DEVICE" = "cuda" ]; then \
+        pip install --no-cache-dir -r requirements-cuda.txt ; \
     else \
-        pip install -r requirements.txt; \
-    fi && \
-    pip cache purge
+        pip install --no-cache-dir -r requirements.txt ; \
+    fi
 
-COPY src/ ./src/
+COPY . .
 
 EXPOSE ${PORT}
 HEALTHCHECK CMD curl -f http://127.0.0.1:${PORT} || exit 1
